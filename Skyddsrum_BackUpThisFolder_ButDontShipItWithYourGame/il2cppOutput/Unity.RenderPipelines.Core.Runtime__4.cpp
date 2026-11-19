@@ -23042,7 +23042,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR ObservableList_1_tA2EE47FA1DF709E
 		return L_0;
 	}
 }
-// Method Definition Index: 44786
+// Method Definition Index: 44787
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR List_1_t9197976D9CD257810C9C417B3050A6C49D652F8D* RenderPipelineGraphicsSettingsCollection_get_settingsList_m3556650DEDCDCDD9929049D16180E805315EE32D_inline (RenderPipelineGraphicsSettingsCollection_t86FB863F5A364E13792215DCA551DC81D8905162* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25141,7 +25141,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR ValueTuple_2_t66C82960295DE11A532
 		return L_0;
 	}
 }
-// Method Definition Index: 72956
+// Method Definition Index: 72957
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t HashSet_1_get_Count_mA764DCA3CB14CB2CBDF742A163492FF4DA515B63_fshared_inline (HashSet_1_t2E820DA94CC6D5A61CA29EBD9BE297C43D691C87* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25150,7 +25150,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t HashSet_1_get_Count_mA764
 		return L_0;
 	}
 }
-// Method Definition Index: 72999
+// Method Definition Index: 73000
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Il2CppSharedGenericObject* Enumerator_get_Current_m06AE6B158E72B471CF5FC6BCF63AA55CE70CC9A4_gshared_inline (Enumerator_t21DE302BED6606A0927F65B97AD5C1633699E17B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>

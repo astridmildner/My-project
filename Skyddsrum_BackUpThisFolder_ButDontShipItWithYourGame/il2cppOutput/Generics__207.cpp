@@ -20905,7 +20905,7 @@ IL_003c:
 		return;
 	}
 }
-// Method Definition Index: 75734
+// Method Definition Index: 75749
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Span_1_t532986431ECB076ABA686C666AF8C40F4419ADF4 NoAllocHelpers_CreateSpan_TisStyleSelectorMatch_tA4C195A8F23EE7E672CEE7042BA64189DBC2E6DE_m8D8650D129D723D60A17C51AB677E623C00D1930_inline (List_1_tC19CF9590EBD62041C53FB658F836FBCBEBB2D75* ___0_list, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -20991,7 +20991,7 @@ IL_003c:
 		return;
 	}
 }
-// Method Definition Index: 72999
+// Method Definition Index: 73000
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Il2CppSharedGenericObject* Enumerator_get_Current_m06AE6B158E72B471CF5FC6BCF63AA55CE70CC9A4_gshared_inline (Enumerator_t21DE302BED6606A0927F65B97AD5C1633699E17B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>

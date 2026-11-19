@@ -1132,7 +1132,9 @@
           },
           {
             "name": "CapsuleCollider",
-            "scenes": [],
+            "scenes": [
+              "Assets/Scenes/SampleScene.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           },
@@ -1166,7 +1168,9 @@
           },
           {
             "name": "Rigidbody",
-            "scenes": [],
+            "scenes": [
+              "Assets/Scenes/SampleScene.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           },
