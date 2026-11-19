@@ -121,6 +121,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.XRHandLocomotion
             {
                 m_TeleportInteractor.gameObject.SetActive(false);
                 StopCoroutine(m_HoldGestureDetection);
+                m_HoldGestureDetection = null; // [Skyddsrum] så att avslutningen inte körs två gånger
                 m_ActivateGestureDetection = StartCoroutine(ActivateGestureDetection());
 
                 m_NearFarInteractor.enabled = true;
@@ -136,7 +137,20 @@ namespace UnityEngine.XR.Interaction.Toolkit.XRHandLocomotion
         void OnTeleportSelectExited(SelectExitEventArgs eventArgs)
         {
             m_JoystickPinchHandGesture.StopJoystickPinchHandGestureTracking();
+#if XR_HANDS_1_5_OR_NEWER
+            // [Skyddsrum] Gå tillbaka till vanliga grepp direkt efter teleporten
+            if (isActiveAndEnabled) StartCoroutine(ExitTeleportModeNextFrame());
+#endif
         }
+
+#if XR_HANDS_1_5_OR_NEWER
+        IEnumerator ExitTeleportModeNextFrame()
+        {
+            yield return null; // låt teleporten genomföras först
+            yield return null;
+            OnCancelDetected();
+        }
+#endif
 
 #if XR_HANDS_1_5_OR_NEWER
         /// <summary>
@@ -176,10 +190,35 @@ namespace UnityEngine.XR.Interaction.Toolkit.XRHandLocomotion
         }
 
 #if XR_HANDS_1_5_OR_NEWER
+        [Header("Skyddsrum: automatisk avslutning")]
+        [SerializeField, Tooltip("Hur länge (sekunder) man kan släppa teleport-gesten innan handen går tillbaka till vanliga grepp")]
+        float m_AutoCancelDelay = 1.0f;
+
         IEnumerator MaintainTeleportMode()
         {
+            float lastPoseTime = Time.time;
             while (isActiveAndEnabled)
             {
+                if (m_LatestHandData != null && m_LatestHandData.subsystem.running && m_LatestHandData.hand.isTracked)
+                {
+                    // [Skyddsrum] Håller man inte kvar gesten (och inte siktar) avslutas teleportläget automatiskt
+                    var poseHeld = m_ActivateHandShape.CheckConditions(m_LatestHandData)
+                        && m_ActivateHandOrientation.CheckConditions(m_LatestHandData.hand.rootPose, m_LatestHandData.hand.handedness);
+                    if (poseHeld || m_TeleportInteractor.hasSelection)
+                        lastPoseTime = Time.time;
+                    else if (Time.time - lastPoseTime > m_AutoCancelDelay)
+                    {
+                        OnCancelDetected();
+                        yield break;
+                    }
+                }
+                else if (Time.time - lastPoseTime > m_AutoCancelDelay)
+                {
+                    // Handen tappade spårningen – gå tillbaka till vanliga grepp
+                    OnCancelDetected();
+                    yield break;
+                }
+
                 // Check that the hand subsystem is still running to guard against accessing a destroyed joints
                 // array due to the hand subsystem being destroyed between the time of the joints updated callback
                 // and this coroutine executes.
