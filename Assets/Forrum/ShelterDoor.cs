@@ -105,7 +105,8 @@ public class ShelterDoor : MonoBehaviour
         for (int i = 0; i < blockedZones.Length; i++)
         {
             var zone = blockedZones[i];
-            if (zone == null || !ForrumUtil.InBox(zone, head)) continue;
+            // Avbockade spärrzoner (eller "Spärrzoner"-objektet) räknas inte – praktiskt under utveckling
+            if (zone == null || !zone.gameObject.activeInHierarchy || !ForrumUtil.InBox(zone, head)) continue;
             Vector3 dir = i < pushDirections.Length && pushDirections[i].sqrMagnitude > 0.0001f
                 ? pushDirections[i].normalized
                 : -transform.forward;

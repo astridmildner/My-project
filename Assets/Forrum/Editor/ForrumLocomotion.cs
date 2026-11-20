@@ -154,6 +154,29 @@ public static class ForrumLocomotion
         return box;
     }
 
+    // ---- Utveckling: slå av/på spärrzonerna ----
+    [MenuItem("Tools/Förrum/Felsökning/Spärrzoner AV (gå fritt in i skyddsrummet)")]
+    public static void BlockOff() => SetBlockZones(false);
+
+    [MenuItem("Tools/Förrum/Felsökning/Spärrzoner PÅ")]
+    public static void BlockOn() => SetBlockZones(true);
+
+    static void SetBlockZones(bool on)
+    {
+        var door = Object.FindFirstObjectByType<ShelterDoor>();
+        var zones = door != null ? door.transform.Find("Spärrzoner") : null;
+        string msg;
+        if (zones == null) msg = "[Spärr] Hittade inga spärrzoner. Kör 'Spärra skyddsrummet tills dörren öppnas' först.";
+        else
+        {
+            Undo.RecordObject(zones.gameObject, "Spärrzoner av/på");
+            zones.gameObject.SetActive(on);
+            EditorSceneManager.MarkSceneDirty(zones.gameObject.scene);
+            msg = "[Spärr] Spärrzonerna är nu " + (on ? "PÅ" : "AV – du kan gå fritt in i skyddsrummet") + ".";
+        }
+        Debug.Log(msg);
+    }
+
     // ---- Felsökning: slå av/på handteleporten ----
     [MenuItem("Tools/Förrum/Felsökning/Stäng av handteleport")]
     public static void DisableHandTeleport() => SetHandTeleport(false);
