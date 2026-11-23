@@ -13,6 +13,15 @@ public static class VisaRum
     [MenuItem("Tools/Skyddsrum/Visa i Scene-vyn/Förrummet")]
     public static void Anteroom() => Show(new Vector3(1.6f, 3.1f, 1.8f), Quaternion.Euler(10f, -90f, 0f), 0.4f);
 
+    [MenuItem("Tools/Skyddsrum/Visa i Scene-vyn/Skyddsrumsdörren – insidan")]
+    public static void DoorInside() => Show(new Vector3(0.45f, 3.1f, 1.84f), Quaternion.Euler(6f, 90f, 0f), 0.9f);
+
+    [MenuItem("Tools/Skyddsrum/Visa i Scene-vyn/Skyddsrumsdörren – utsidan (förrummet)")]
+    public static void DoorOutside() => Show(new Vector3(0.75f, 3.1f, 1.84f), Quaternion.Euler(6f, -90f, 0f), 0.9f);
+
+    [MenuItem("Tools/Skyddsrum/Visa i Game-vyn (under Play)/Vid skyddsrumsdörren – insidan")]
+    public static void PlayDoorInside() => MovePlayer(new Vector3(-1.75f, 2.1f, 1.75f), 90f);
+
     // ---- Under Play: flytta spelaren (återställs när Play stoppas) ----
     [MenuItem("Tools/Skyddsrum/Visa i Game-vyn (under Play)/Stora rummet – mot britsarna")]
     public static void PlayBigRoomWest() => MovePlayer(new Vector3(-1.2f, 2.1f, 1.6f), -125f);

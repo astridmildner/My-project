@@ -14,6 +14,11 @@ public abstract class ShelterTask : MonoBehaviour
     public ShelterDoor startWhenDoorOpens;
     [Tooltip("Uppgiften startar också när spelarens huvud kommer in i något av de här områdena. Tomt = dörrens spärrzoner används.")]
     public BoxCollider[] startWhenPlayerInside = new BoxCollider[0];
+    [Tooltip("Om satt: uppgiften startar när den här uppgiften är klar (plus fördröjning) i stället för vid dörren.")]
+    public ShelterTask startAfterTask;
+    [Tooltip("Starta först när spelaren är inne i skyddsrummet (inte redan när dörren öppnas)")]
+    public bool requirePlayerInside = false;
+    public float startDelaySeconds = 10f;
 
     [Header("Tider (sekunder efter start)")]
     public float hintAfterSeconds = 60f;
@@ -33,6 +38,8 @@ public abstract class ShelterTask : MonoBehaviour
 
     public bool IsStarted { get; private set; }
     public bool IsDone { get; private set; }
+    /// <summary>När uppgiften blev klar (Time.time), -1 om den inte är klar.</summary>
+    public float DoneTime { get; private set; } = -1f;
     /// <summary>0 = ingen påverkan, 1 = som sämst.</summary>
     public float Severity { get; private set; }
     public float ElapsedSeconds => _t;
@@ -64,6 +71,7 @@ public abstract class ShelterTask : MonoBehaviour
         if (CheckComplete())
         {
             IsDone = true;
+            DoneTime = Time.time;
             Severity = 0f;
             SetGlow(false);
             Message("Bra jobbat! Uppgiften är klar.", new Color(0.35f, 1f, 0.45f), 4f);
@@ -92,8 +100,10 @@ public abstract class ShelterTask : MonoBehaviour
 
     bool ShouldStart()
     {
+        if (startAfterTask != null)
+            return startAfterTask.IsDone && Time.time - startAfterTask.DoneTime >= startDelaySeconds;
         if (startWhenDoorOpens == null) return true;
-        if (startWhenDoorOpens.IsOpen) return true;
+        if (startWhenDoorOpens.IsOpen && !requirePlayerInside) return true;
         var cam = Camera.main;
         if (cam == null) return false;
         var zones = startWhenPlayerInside != null && startWhenPlayerInside.Length > 0
@@ -114,7 +124,7 @@ public abstract class ShelterTask : MonoBehaviour
         Debug.Log($"[Uppgift] Startad: {title} (ledtråd efter {hintAfterSeconds:F0} s, synpåverkan efter {consequenceAfterSeconds:F0} s)");
     }
 
-    void Message(string text, Color color, float seconds)
+    protected void Message(string text, Color color, float seconds)
     {
         if (showMessages) TaskMessage.Show(text, color, seconds);
     }

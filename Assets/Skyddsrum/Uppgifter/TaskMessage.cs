@@ -33,6 +33,7 @@ public class TaskMessage : MonoBehaviour
         var textGo = new GameObject("Text");
         textGo.transform.SetParent(transform, false);
         _text = textGo.AddComponent<TextMeshPro>();
+        ApplyOverlay(_text);
         _text.fontSize = 0.6f;
         _text.alignment = TextAlignmentOptions.Center;
         _text.textWrappingMode = TextWrappingModes.Normal;
@@ -41,6 +42,13 @@ public class TaskMessage : MonoBehaviour
         _text.outlineWidth = 0.25f;
         _text.outlineColor = new Color32(0, 0, 0, 255);
         _text.alpha = 0f;
+    }
+
+    /// <summary>Gör att texten ritas ovanpå allt (syns även bakom väggar och möbler).</summary>
+    public static void ApplyOverlay(TextMeshPro text)
+    {
+        var mat = Resources.Load<Material>("UppgiftText_Overlay");
+        if (mat != null) text.fontSharedMaterial = mat;
     }
 
     void Display(string message, Color color, float seconds)

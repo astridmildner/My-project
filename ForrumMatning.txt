@@ -1,1 +1,1 @@
-[Uppgifter] Tider: ledtråd efter 10 s, synpåverkan efter 20 s.
+[Dörr] Tryckte på handtag 2. Stängd: True, tät: True

@@ -48,7 +48,24 @@ public class ShelterDoor : MonoBehaviour
     public GameObject[] disableWhenOpen;
     public UnityEvent onOpened;
 
+    [Header("Handtag på insidan (verklighetstrogen dörr)")]
+    [Tooltip("Båda måste vara nere (S) för att dörren ska vara stängd och tät")]
+    public ShelterDoorHandle[] handles = new ShelterDoorHandle[0];
+    public float closeSpeed = 70f;
+    public UnityEvent onSealed;
+
+    /// <summary>Dörren är upplåst (man har packat rätt). Förblir sann även om man stänger den inifrån.</summary>
     public bool IsOpen { get; private set; }
+    /// <summary>Dörrbladet står stängt i karmen (efter att man varit inne).</summary>
+    public bool IsLeafClosed => IsOpen && !_leafOpen && Mathf.Abs(_angle) < 0.5f;
+    /// <summary>Dörren är stängd och båda handtagen är nere (S).</summary>
+    public bool IsSealed => IsLeafClosed && AllHandles(true);
+
+    /// <summary>När spelaren senast nöp ett handtag (Time.time).</summary>
+    public float LastHandleTime { get; private set; } = -999f;
+
+    bool _leafOpen;
+    bool HasHandles => handles != null && handles.Length > 0;
 
     static readonly Color Locked = new Color(0.85f, 0.1f, 0.08f);
     static readonly Color Open = new Color(0.1f, 0.8f, 0.2f);
@@ -69,7 +86,9 @@ public class ShelterDoor : MonoBehaviour
         var cam = Camera.main;
         if (IsOpen)
         {
-            _angle = Mathf.MoveTowards(_angle, openAngle, openSpeed * Time.deltaTime);
+            UpdatePendingHandle();
+            float target = (_leafOpen || !HasHandles) ? openAngle : 0f;
+            _angle = Mathf.MoveTowards(_angle, target, (target == 0f ? closeSpeed : openSpeed) * Time.deltaTime);
             if (hinge != null) hinge.localRotation = Quaternion.Euler(0f, _angle, 0f);
             if (cam != null && ForrumUtil.InBox(doorwayZone, cam.transform.position)) DropHeldItems();
             return;
@@ -146,6 +165,7 @@ public class ShelterDoor : MonoBehaviour
     void OpenDoor()
     {
         IsOpen = true;
+        _leafOpen = true;
         Show(Open, "<b>Välkommen in i skyddsrummet</b>", true);
         foreach (var go in enableWhenOpen) if (go != null) go.SetActive(true);
         foreach (var go in disableWhenOpen) if (go != null) go.SetActive(false);
@@ -190,6 +210,99 @@ public class ShelterDoor : MonoBehaviour
             }
             Show(Locked, "Du kan inte ta med dig saker i händerna.\nDet du höll i ligger kvar utanför.");
         }
+    }
+
+    // ---------------- Handtagen på insidan ----------------
+
+    bool AllHandles(bool down)
+    {
+        if (!HasHandles) return false;
+        foreach (var h in handles) if (h != null && h.IsDown != down) return false;
+        return true;
+    }
+
+    ShelterDoorHandle _pendingHandle;
+
+    /// <summary>Anropas när spelaren nyper/greppar ett av handtagen.</summary>
+    public void HandlePressed(ShelterDoorHandle handle)
+    {
+        if (handle == null) return;
+        LastHandleTime = Time.time;
+
+        if (!IsOpen)
+        {
+            // Handtagen sitter på insidan – står man där ska de alltid fungera
+            // (t.ex. om man kom in med spärrzonerna avstängda under utveckling).
+            UnlockFromInside();
+        }
+
+        if (_leafOpen)
+        {
+            // Dörren står öppen: den slår igen och handtaget trycks ner när den är stängd
+            _leafOpen = false;
+            _pendingHandle = handle;
+            Debug.Log("[Dörr] Handtag nypt – dörren stängs.");
+            return;
+        }
+        if (Mathf.Abs(_angle) > 0.5f) { _pendingHandle = handle; return; } // håller på att stängas
+
+        handle.SetDown(!handle.IsDown);
+        AfterHandleChanged(handle);
+    }
+
+    void UpdatePendingHandle()
+    {
+        if (_pendingHandle == null || _leafOpen || Mathf.Abs(_angle) > 0.5f) return;
+        var h = _pendingHandle;
+        _pendingHandle = null;
+        h.SetDown(true);
+        AfterHandleChanged(h);
+    }
+
+    void AfterHandleChanged(ShelterDoorHandle handle)
+    {
+        var white = new Color(1f, 0.95f, 0.8f);
+        Debug.Log($"[Dörr] Handtag {handle.name}: {(handle.IsDown ? "nere (S)" : "uppe (Ö)")}");
+        if (AllHandles(true))
+        {
+            TaskMessage.Show("Bra! Dörren är stängd och tät.", new Color(0.3f, 1f, 0.4f), 4f);
+            onSealed?.Invoke();
+        }
+        else if (AllHandles(false))
+        {
+            _leafOpen = true;
+            TaskMessage.Show("Båda handtagen är uppe (Ö) – dörren öppnas.", white, 4f);
+        }
+        else if (handle.IsDown)
+        {
+            TaskMessage.Show("Tryck ner det andra handtaget också.", white, 4f);
+        }
+        else
+        {
+            TaskMessage.Show("Ett handtag är uppe – dörren är inte tät.", new Color(1f, 0.8f, 0.2f), 4f);
+        }
+    }
+
+    void UnlockFromInside()
+    {
+        IsOpen = true;
+        _leafOpen = false; // dörren står kvar stängd
+        foreach (var go in enableWhenOpen) if (go != null) go.SetActive(true);
+        foreach (var go in disableWhenOpen) if (go != null) go.SetActive(false);
+        Show(Open, "<b>Dörren är upplåst</b>", true);
+        Debug.Log("[Dörr] Upplåst inifrån via handtaget.");
+    }
+
+    /// <summary>Endast för test i editorn: låser upp dörren direkt.</summary>
+    public void DebugUnlock() { if (!IsOpen) OpenDoor(); }
+
+    /// <summary>Endast för test i editorn: stänger dörren och trycker ner båda handtagen.</summary>
+    public void DebugSeal()
+    {
+        if (!IsOpen) OpenDoor();
+        _leafOpen = false;
+        LastHandleTime = Time.time;
+        if (HasHandles) foreach (var h in handles) if (h != null) h.SetDown(true);
     }
 
     float _holdMessageUntil;
