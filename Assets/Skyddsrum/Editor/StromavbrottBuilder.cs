@@ -71,7 +71,7 @@ public static class StromavbrottBuilder
                 var lg = new GameObject("Nödljus (strömavbrott)");
                 lg.transform.SetParent(s, false);
                 var l = lg.AddComponent<Light>();
-                l.type = LightType.Point; l.color = new Color(0.25f, 1f, 0.45f); l.intensity = 0.6f; l.range = 2.8f; l.shadows = LightShadows.None;
+                l.type = LightType.Point; l.color = new Color(0.25f, 1f, 0.45f); l.intensity = 0.35f; l.range = 2.8f; l.shadows = LightShadows.None;
                 l.enabled = false;
                 em.Add(l);
             }
@@ -88,7 +88,7 @@ public static class StromavbrottBuilder
         a.playOnAwake = false; a.loop = true; a.spatialBlend = 1f; a.minDistance = 1.2f; a.maxDistance = 9f; a.volume = 0f;
         a.rolloffMode = AudioRolloffMode.Linear;
         po.fanSound = a;
-        po.fanVolume = 0.3f;
+        po.fanVolume = 0.1f;
 
         // ---- Ficklampa ----
         po.flashlight = BuildFlashlight(go.transform);
@@ -164,6 +164,7 @@ public static class StromavbrottBuilder
         var rb = root.AddComponent<Rigidbody>();
         rb.mass = 0.3f; rb.isKinematic = true; rb.useGravity = false;
         root.AddComponent<XRGrabInteractable>();
+        FixarBuilder.UpgradeFlashlight(root);
         root.SetActive(false);
         return root;
     }

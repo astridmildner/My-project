@@ -1,0 +1,45 @@
+using System.Linq;
+using System.Text;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+
+public static class StromProbe3
+{
+    [MenuItem("Tools/Skyddsrum/Felsökning/Mät ljud, teleport och golv")]
+    public static void Probe()
+    {
+        var sb = new StringBuilder();
+        foreach (var a in Object.FindObjectsByType<AudioSource>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            sb.AppendLine($"AUDIO {P(a.transform)} clip={a.clip?.name} len={(a.clip ? a.clip.length : 0):F1} loop={a.loop} awake={a.playOnAwake} vol={a.volume} en={a.enabled}/{a.gameObject.activeInHierarchy} spatial={a.spatialBlend}");
+        var fly = GameObject.Find("03-flyglarm");
+        if (fly != null) foreach (var c in fly.GetComponents<Component>()) sb.AppendLine($"FLY comp {c.GetType().FullName}");
+        foreach (var mb in Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            var t = mb.GetType();
+            if (t.Name.Contains("Teleportation") || t.Name.Contains("Gravity") || t.Name.Contains("Climb") || t.Name.Contains("XROrigin") || t.Name.Contains("Locomotion") && !t.Name.Contains("Mediator"))
+            {
+                string extra = "";
+                var cols = mb.GetComponentsInChildren<Collider>(true);
+                if (cols.Length > 0) { var b = cols[0].bounds; foreach (var c in cols) b.Encapsulate(c.bounds); extra = $" cols={cols.Length} ymin={b.min.y:F2} ymax={b.max.y:F2} x={b.min.x:F1}..{b.max.x:F1} z={b.min.z:F1}..{b.max.z:F1}"; }
+                sb.AppendLine($"COMP {t.Name} on {P(mb.transform)} layer={LayerMask.LayerToName(mb.gameObject.layer)} en={mb.enabled}/{mb.gameObject.activeInHierarchy}{extra}");
+            }
+        }
+        foreach (var cc in Object.FindObjectsByType<CharacterController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            sb.AppendLine($"CC {P(cc.transform)} pos={cc.transform.position} h={cc.height}");
+        var origin = Object.FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
+        if (origin != null) sb.AppendLine($"ORIGIN {P(origin.transform)} pos={origin.transform.position} mode={origin.RequestedTrackingOriginMode} camYOffset={origin.CameraYOffset}");
+        var golv = GameObject.Find("Golv");
+        if (golv != null) foreach (var c in golv.GetComponents<Component>()) sb.AppendLine($"GOLV comp {c.GetType().Name}");
+        for (int i = 0; i < QualitySettings.names.Length; i++)
+        {
+            var rp = QualitySettings.GetRenderPipelineAssetAt(i) as UniversalRenderPipelineAsset;
+            sb.AppendLine($"Q{i} {QualitySettings.names[i]} rp={rp?.name} addLights={rp?.additionalLightsRenderingMode} max={rp?.maxAdditionalLightsCount}");
+        }
+        var def = GraphicsSettings.defaultRenderPipeline as UniversalRenderPipelineAsset;
+        sb.AppendLine($"DEFAULT rp={def?.name} addLights={def?.additionalLightsRenderingMode} max={def?.maxAdditionalLightsCount} current={QualitySettings.GetQualityLevel()}");
+        System.IO.File.WriteAllText(System.IO.Path.Combine(Application.dataPath, "..", "ForrumMatning.txt"), sb.ToString());
+    }
+    static string P(Transform t) { var s = t.name; while (t.parent != null) { t = t.parent; s = t.name + "/" + s; } return s; }
+}

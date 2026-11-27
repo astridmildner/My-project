@@ -18,8 +18,10 @@ public class PowerOutage : MonoBehaviour
     public float startDelaySeconds = 10f;
     [Tooltip("Sekunder från att strömmen går tills vevuppgiften börjar")]
     public float crankStartDelay = 5f;
-    [Tooltip("Hur länge man behöver veva innan strömmen kommer tillbaka")]
+    [Tooltip("Hur länge man vevar: strömmen kommer tillbaka så här många sekunder efter att man BÖRJAT veva")]
     public float crankSeconds = 40f;
+    [Tooltip("Skyddsnät: om man aldrig börjar veva startar nedräkningen ändå efter så här många sekunder")]
+    public float maxWaitBeforeCrank = 150f;
 
     [Header("Belysning")]
     [Tooltip("Lampor som släcks helt")]
@@ -58,8 +60,9 @@ public class PowerOutage : MonoBehaviour
     public float CrankProgress01 => IsRestored ? 1f : !_crankStarted ? 0f : Mathf.Clamp01((Time.time - _crankStartAt) / Mathf.Max(0.01f, crankSeconds));
     public float SecondsUntilPowerBack => IsRestored ? 0f : !_crankStarted ? crankSeconds : Mathf.Max(0f, crankSeconds - (Time.time - _crankStartAt));
 
-    float _outageAt = -1f, _crankStartAt;
-    bool _crankStarted;
+    float _outageAt = -1f, _crankStartAt, _taskStartAt;
+    bool _crankStarted;   // nedräkningen har startat (man har börjat veva)
+    bool _taskStarted;    // vevuppgiften har visats
     float[] _offOrig, _dimOrig;
     UnityEngine.Rendering.SphericalHarmonicsL2[] _probeOrig;
 
@@ -96,11 +99,19 @@ public class PowerOutage : MonoBehaviour
 
         if (Current == State.Outage)
         {
-            if (!_crankStarted && Time.time - _outageAt >= crankStartDelay)
+            if (!_taskStarted && Time.time - _outageAt >= crankStartDelay)
+            {
+                _taskStarted = true;
+                _taskStartAt = Time.time;
+                if (crankTask != null) crankTask.StartTask();
+            }
+            // Nedräkningen startar när man börjar veva (eller efter skyddsnätets tid)
+            if (_taskStarted && !_crankStarted &&
+                ((crankTask != null && crankTask.CrankedSeconds > 0f) || Time.time - _taskStartAt >= maxWaitBeforeCrank))
             {
                 _crankStarted = true;
                 _crankStartAt = Time.time;
-                if (crankTask != null) crankTask.StartTask();
+                Debug.Log($"[Ström] Vevandet har börjat – strömmen kommer tillbaka om {crankSeconds:F0} s.");
             }
             if (_crankStarted && Time.time - _crankStartAt >= crankSeconds) Restore();
         }
@@ -127,7 +138,7 @@ public class PowerOutage : MonoBehaviour
         {
             TaskMessage.Show("Strömmen har gått!\nDu har ingen ficklampa – den hade varit bra att packa.", new Color(1f, 0.65f, 0.25f), crankStartDelay);
         }
-        Debug.Log($"[Ström] Strömavbrott (ficklampa: {(HadFlashlight ? "ja" : "nej")}). Strömmen kommer tillbaka om {crankStartDelay + crankSeconds:F0} s.");
+        Debug.Log($"[Ström] Strömavbrott (ficklampa: {(HadFlashlight ? "ja" : "nej")}). Strömmen kommer tillbaka {crankSeconds:F0} s efter att man börjat veva.");
     }
 
     void Restore()
@@ -148,7 +159,8 @@ public class PowerOutage : MonoBehaviour
         _skipRequested = false;
         if (Current == State.PowerOn) BeginOutage();
         if (Current != State.Outage) return;
-        if (!_crankStarted) { _crankStarted = true; if (crankTask != null) crankTask.StartTask(); }
+        if (!_taskStarted) { _taskStarted = true; _taskStartAt = Time.time; if (crankTask != null) crankTask.StartTask(); }
+        _crankStarted = true;
         _crankStartAt = Time.time - crankSeconds + 2f;
         Debug.Log($"[Ström] Test: strömmen kommer tillbaka om 2 s (t={Time.time:F1}, start={_crankStartAt:F1}).");
     }
