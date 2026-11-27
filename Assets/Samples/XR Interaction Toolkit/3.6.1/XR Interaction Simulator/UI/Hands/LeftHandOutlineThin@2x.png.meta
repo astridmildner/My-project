@@ -56,7 +56,13 @@ TextureImporter:
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
+<<<<<<< HEAD
   spriteTessellationDetail: -1
+=======
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+>>>>>>> d785cf6476a9ef443e58b4c6ac9574f1cdf734ec
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -122,6 +128,7 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+<<<<<<< HEAD
   - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 2048
@@ -135,6 +142,8 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+=======
+>>>>>>> d785cf6476a9ef443e58b4c6ac9574f1cdf734ec
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -173,8 +182,12 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
+<<<<<<< HEAD
     nameFileIdTable:
       LeftHandOutlineThin@2x_0: -780900386859126059
+=======
+    nameFileIdTable: {}
+>>>>>>> d785cf6476a9ef443e58b4c6ac9574f1cdf734ec
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

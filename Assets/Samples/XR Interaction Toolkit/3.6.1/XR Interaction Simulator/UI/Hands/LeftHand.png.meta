@@ -56,7 +56,13 @@ TextureImporter:
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
+<<<<<<< HEAD
   spriteTessellationDetail: -1
+=======
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+>>>>>>> d785cf6476a9ef443e58b4c6ac9574f1cdf734ec
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -173,8 +179,12 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
+<<<<<<< HEAD
     nameFileIdTable:
       LeftHand_0: -7779679759674261937
+=======
+    nameFileIdTable: {}
+>>>>>>> d785cf6476a9ef443e58b4c6ac9574f1cdf734ec
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
