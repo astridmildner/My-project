@@ -18,6 +18,8 @@ public abstract class ShelterTask : MonoBehaviour
     public ShelterTask startAfterTask;
     [Tooltip("Starta först när spelaren är inne i skyddsrummet (inte redan när dörren öppnas)")]
     public bool requirePlayerInside = false;
+    [Tooltip("Startas bara från ett annat skript (t.ex. strömavbrottet), aldrig av sig själv")]
+    public bool startOnlyFromScript = false;
     public float startDelaySeconds = 10f;
 
     [Header("Tider (sekunder efter start)")]
@@ -74,7 +76,7 @@ public abstract class ShelterTask : MonoBehaviour
             DoneTime = Time.time;
             Severity = 0f;
             SetGlow(false);
-            Message("Bra jobbat! Uppgiften är klar.", new Color(0.35f, 1f, 0.45f), 4f);
+            Message(DoneMessage, new Color(0.35f, 1f, 0.45f), 5f);
             Debug.Log($"[Uppgift] Klar: {title} efter {_t:F0} s");
             return;
         }
@@ -98,8 +100,12 @@ public abstract class ShelterTask : MonoBehaviour
             : 0f;
     }
 
+    protected virtual string StartMessage => "Uppgift: " + title;
+    protected virtual string DoneMessage => "Bra jobbat! Uppgiften är klar.";
+
     bool ShouldStart()
     {
+        if (startOnlyFromScript) return false;
         if (startAfterTask != null)
             return startAfterTask.IsDone && Time.time - startAfterTask.DoneTime >= startDelaySeconds;
         if (startWhenDoorOpens == null) return true;
@@ -120,7 +126,7 @@ public abstract class ShelterTask : MonoBehaviour
     {
         if (IsStarted || IsDone) return;
         IsStarted = true;
-        Message("Uppgift: " + title, Color.white, 7f);
+        Message(StartMessage, Color.white, 7f);
         Debug.Log($"[Uppgift] Startad: {title} (ledtråd efter {hintAfterSeconds:F0} s, synpåverkan efter {consequenceAfterSeconds:F0} s)");
     }
 
@@ -165,7 +171,7 @@ public abstract class ShelterTask : MonoBehaviour
     }
 
     /// <summary>För testning: ändra tiderna på alla uppgifter.</summary>
-    public void SetTimes(float hint, float consequence)
+    public virtual void SetTimes(float hint, float consequence)
     {
         hintAfterSeconds = hint;
         consequenceAfterSeconds = consequence;

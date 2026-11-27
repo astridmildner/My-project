@@ -1,0 +1,25 @@
+using System.Text;
+using UnityEditor;
+using UnityEngine;
+
+public static class StromProbe
+{
+    [MenuItem("Tools/Skyddsrum/Felsökning/Mät ljuskällor")]
+    public static void Probe()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Ambient mode={RenderSettings.ambientMode} color={RenderSettings.ambientLight} sky={RenderSettings.ambientSkyColor} eq={RenderSettings.ambientEquatorColor} gnd={RenderSettings.ambientGroundColor} int={RenderSettings.ambientIntensity} refl={RenderSettings.reflectionIntensity} lightmaps={LightmapSettings.lightmaps.Length}");
+        foreach (var l in Object.FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            sb.AppendLine($"LIGHT {Path(l.transform)} type={l.type} mode={l.lightmapBakeType} int={l.intensity:F2} range={l.range:F1} en={l.enabled}/{l.gameObject.activeInHierarchy} col={l.color}");
+        foreach (var r in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            foreach (var m in r.sharedMaterials)
+                if (m != null && m.IsKeywordEnabled("_EMISSION") && m.HasProperty("_EmissionColor") && m.GetColor("_EmissionColor").maxColorComponent > 0.01f)
+                    sb.AppendLine($"EMIS {Path(r.transform)} mat={m.name} e={m.GetColor("_EmissionColor")}");
+        foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            if (t.name.Contains("Hand") && t.parent != null && t.parent.name.Contains("Camera Offset")) sb.AppendLine($"HAND {Path(t)}");
+        var cam = Camera.main; if (cam != null) sb.AppendLine($"CAM {Path(cam.transform)}");
+        System.IO.File.WriteAllText(System.IO.Path.Combine(Application.dataPath, "..", "ForrumMatning.txt"), sb.ToString());
+        Debug.Log("[Probe] klar");
+    }
+    static string Path(Transform t) { var s = t.name; while (t.parent != null) { t = t.parent; s = t.name + "/" + s; } return s; }
+}

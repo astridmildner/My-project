@@ -1,0 +1,22 @@
+using System.Linq;
+using System.Text;
+using UnityEditor;
+using UnityEngine;
+
+public static class StromProbe2
+{
+    [MenuItem("Tools/Skyddsrum/Felsökning/Mät förberäknat ljus")]
+    public static void Probe()
+    {
+        var sb = new StringBuilder();
+        var rs = Object.FindObjectsByType<MeshRenderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        var lm = rs.Where(r => r.lightmapIndex >= 0 && r.lightmapIndex < 65534).ToArray();
+        sb.AppendLine($"renderers={rs.Length} lightmapped={lm.Length} lightmaps={LightmapSettings.lightmaps.Length} probes={LightmapSettings.lightProbes?.count}");
+        foreach (var r in lm.Take(25)) sb.AppendLine($"LM {r.name} idx={r.lightmapIndex} parent={(r.transform.parent ? r.transform.parent.name : "-")}");
+        var walls = rs.Where(r => r.name.Contains("Vägg") || r.name.Contains("Golv") || r.name.Contains("Tak") || r.name.Contains("Wall")).Take(15);
+        foreach (var r in walls) sb.AppendLine($"W {r.name} lm={r.lightmapIndex} mat={r.sharedMaterial?.name} sh={r.sharedMaterial?.shader.name} emis={(r.sharedMaterial != null && r.sharedMaterial.IsKeywordEnabled("_EMISSION"))} probes={r.lightProbeUsage}");
+        sb.AppendLine($"ambientProbe? mode={RenderSettings.ambientMode} skybox={RenderSettings.skybox?.name} defRefl={RenderSettings.defaultReflectionMode}");
+        foreach (var p in Object.FindObjectsByType<ReflectionProbe>(FindObjectsSortMode.None)) sb.AppendLine($"RP {p.name} int={p.intensity} mode={p.mode}");
+        System.IO.File.WriteAllText(System.IO.Path.Combine(Application.dataPath, "..", "ForrumMatning.txt"), sb.ToString());
+    }
+}

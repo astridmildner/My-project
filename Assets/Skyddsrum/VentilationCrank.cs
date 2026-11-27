@@ -27,6 +27,11 @@ public class VentilationCrank : MonoBehaviour
     [Tooltip("Varv per minut som räknas som full ventilation")]
     public float targetRpm = 40f;
 
+    [Header("Elmotor")]
+    [Tooltip("Fläkten drivs av el (sätts av strömavbrottet)")]
+    public bool motorRunning = false;
+    public float motorDegreesPerSecond = 1080f;
+
     [Header("Ljud (valfritt)")]
     public AudioSource sound;
 
@@ -81,6 +86,7 @@ public class VentilationCrank : MonoBehaviour
         if (pivot == null) return;
         float dt = Mathf.Max(Time.deltaTime, 0.0001f);
         float delta = 0f;
+        if (motorRunning && fanRotor != null) fanRotor.Rotate(Axis, motorDegreesPerSecond * dt, Space.World);
 
         if (_hand != null)
         {

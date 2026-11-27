@@ -128,6 +128,7 @@ public static class UppgiftsBuilder
         foreach (var ct in Object.FindObjectsByType<CrankTask>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             Undo.RecordObject(ct, "Koppla vev-uppgift");
+            if (ct.startOnlyFromScript) continue; // startas av strömavbrottet
             ct.startAfterTask = task;
             EditorUtility.SetDirty(ct);
         }
@@ -189,6 +190,8 @@ public static class UppgiftsBuilder
         task.hintLight = l;
 
         AddRing(task, go.transform);
+        var outage = Object.FindFirstObjectByType<PowerOutage>(FindObjectsInactive.Include);
+        if (outage != null) StromavbrottBuilder.LinkCrank(task, outage);
         EditorSceneManager.MarkSceneDirty(go.scene);
         EditorSceneManager.SaveOpenScenes();
         Selection.activeGameObject = go;

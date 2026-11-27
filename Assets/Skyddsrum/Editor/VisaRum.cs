@@ -19,6 +19,9 @@ public static class VisaRum
     [MenuItem("Tools/Skyddsrum/Visa i Scene-vyn/Skyddsrumsdörren – utsidan (förrummet)")]
     public static void DoorOutside() => Show(new Vector3(0.75f, 3.1f, 1.84f), Quaternion.Euler(6f, -90f, 0f), 0.9f);
 
+    [MenuItem("Tools/Skyddsrum/Visa i Game-vyn (under Play)/Förrummet")]
+    public static void PlayAnteroom() => MovePlayer(new Vector3(2.4f, 2.1f, 1.8f), -90f);
+
     [MenuItem("Tools/Skyddsrum/Visa i Game-vyn (under Play)/Vid skyddsrumsdörren – insidan")]
     public static void PlayDoorInside() => MovePlayer(new Vector3(-1.75f, 2.1f, 1.75f), 90f);
 

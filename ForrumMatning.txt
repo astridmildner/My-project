@@ -1,1 +1,1 @@
-[Dörr] Tryckte på handtag 2. Stängd: True, tät: True
+[Spärr] Två spärrzoner skapade och kopplade till dörren (scenen sparad).

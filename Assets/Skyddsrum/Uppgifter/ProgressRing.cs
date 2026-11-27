@@ -141,7 +141,7 @@ public class ProgressRing : MonoBehaviour
             _shownProgress = p;
             BuildArc(_fill.sharedMesh, p);
             SetColor(_fillMat, ProgressColor(p));
-            float left = Mathf.Max(0f, task.requiredCrankSeconds - task.CrankedSeconds);
+            float left = task.RemainingSeconds;
             _text.text = task.IsDone ? "Klart!" : Mathf.CeilToInt(left) + " s";
         }
 
